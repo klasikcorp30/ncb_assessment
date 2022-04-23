@@ -22,7 +22,6 @@ const sumOfHand = (hand) => {
 };
 
 const stand = (dealerHands) => {
-  console.log("Bool", sumOfHand(dealerHands) < 17);
   while (sumOfHand(dealerHands) < 17) {
     hit(dealerHands, getRandomCard());
     showCards(dealerHands, "Dealer");

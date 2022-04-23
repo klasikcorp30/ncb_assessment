@@ -41,7 +41,7 @@ const startGame = () => {
   //If player has an Ace, ask if they want to use it as 11 or 1
   if (acePresentForPlayer.length > 0) {
     rl.question("Do you want Ace to be 1 or 11? ", (answer) => {
-      if (answer === "1") {
+      if (answer === "11") {
         //Checking criteria with Ace as 1
         checkingCriteria(playerHand, dealerHand, 1);
         playGame(playerHand, dealerHand);
@@ -55,6 +55,11 @@ const startGame = () => {
       }
     });
   }
+
+  //Ensure Ace is alwsays 11 for the dealer
+  dealerHand = dealerHand.filter((card) => Object.keys(card)[0] !== "A");
+  dealerHand.push({ A: 11 });
+
   playGame(playerHand, dealerHand);
   // Tallies the score
 };
@@ -126,12 +131,17 @@ function checkingCriteria(playerHand, dealerHand, checkOption) {
 
 function replayGame() {
   rl.question("Play again? (y/n): ", (response) => {
-    if (response === "y") {
-      startGame();
-    } else {
-      console.log("Thanks for playing!");
-      rl.close();
-      exit();
+    switch (response) {
+      case "y":
+        startGame();
+        break;
+      case "n":
+        console.log("Thank you for playing!");
+        exit();
+      default:
+        console.log("Please input a valid response, y or n");
+        replayGame();
+        break;
     }
   });
 }
