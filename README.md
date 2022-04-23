@@ -8,6 +8,12 @@ A blackjack single player game written Javascript.
 ## Run Locally
 
 
+Clone project
+
+```bash
+  git clone https://github.com/klasikcorp30/ncb_assessment.git
+```
+
 Go to the project directory
 
 ```bash
