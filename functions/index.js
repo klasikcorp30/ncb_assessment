@@ -28,7 +28,7 @@ const stand = (dealerHands) => {
   }
 };
 //This function will be used to display the cards in the hand
-const showCards = (hand, name = "Player") => {
+const showCards = (hand, name = "Your") => {
   console.log(name + " Hand: ", hand);
 };
 
@@ -51,11 +51,19 @@ const isAcePresent = (hand) => {
     return Object.values(card)[0] === 1;
   });
 };
+const showResults = (playerHand, dealerHand) => {
+  console.log(`
+  Resulting hands:
+  Player: ${sumOfHand(playerHand)}
+  Dealer: ${sumOfHand(dealerHand)}
+  `);
+};
 
 module.exports = {
   getRandomCard,
   hit,
   showCards,
+  showResults,
   stand,
   RANDOMCARD,
   sumOfHand,

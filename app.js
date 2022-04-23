@@ -9,6 +9,7 @@ const {
   isBust,
   assignCards,
   isAcePresent,
+  showResults,
 } = require("./functions");
 
 const rl = readline.createInterface({
@@ -25,14 +26,18 @@ This is where the game starts
  This will be needed make decisions concering if dealer or player wins*/
 var playersChoice = "";
 const startGame = () => {
-  console.log("Dealing hands");
+  console.log(`
+  ==========================BkaackJack=========================
+  Welcome to BlackJack! Try to get as close to 21 as you can without going over!
+  Good luck!
+  `);
   let playerHand = [];
   let dealerHand = [];
 
   //Assign cards
   assignCards(playerHand, dealerHand);
 
-  //Get player's cards
+  //Show cards
   showCards(playerHand);
 
   //Check if Ace is present
@@ -100,14 +105,15 @@ function checkingCriteria(playerHand, dealerHand, checkOption) {
       if (isBust(playerHand)) {
         showCards(playerHand);
         console.log("Bust, Dealer wins!");
+        showResults(playerHand, dealerHand);
         // Ask if they want to play again
         replayGame();
       }
       break;
     case 2:
       if (sumOfHand(playerHand) === 21) {
-        showCards(playerHand);
         console.log("Blackjack!! You win!!");
+        showResults(playerHand, dealerHand);
         replayGame();
       }
       break;
@@ -117,8 +123,8 @@ function checkingCriteria(playerHand, dealerHand, checkOption) {
         sumOfHand(dealerHand) > sumOfHand(playerHand) &&
         !isBust(dealerHand)
       ) {
-        showCards(dealerHand, "Dealer's");
-        console.log("Dealer wins, Dealer's hand is: ", sumOfHand(dealerHand));
+        showResults(playerHand, dealerHand);
+        console.log("Dealer wins");
         replayGame();
       }
       break;
@@ -151,8 +157,8 @@ let runnAllChecks = (playerHand, dealerHand) => {
    * This checks if the player has a bust hand
    */
   if (isBust(playerHand)) {
-    showCards(playerHand);
     console.log("Bust, Dealer wins!");
+    showResults(playerHand, dealerHand);
     replayGame();
   }
   /**
@@ -160,8 +166,8 @@ let runnAllChecks = (playerHand, dealerHand) => {
    *If so, the player wins
    */
   if (sumOfHand(playerHand) === 21) {
-    showCards(playerHand);
     console.log("Blackjack!! You win!!");
+    showResults(playerHand, dealerHand);
     replayGame();
   }
   /**
@@ -176,7 +182,8 @@ let runnAllChecks = (playerHand, dealerHand) => {
     playersChoice === "s"
   ) {
     showCards(dealerHand, "Dealer's");
-    console.log("Dealer wins, Dealer's hand is: ", sumOfHand(dealerHand));
+    console.log("Dealer wins!! ");
+    showResults(playerHand, dealerHand);
     replayGame();
   }
 
@@ -191,14 +198,15 @@ let runnAllChecks = (playerHand, dealerHand) => {
     sumOfHand(dealerHand) > 17 &&
     playersChoice === "s"
   ) {
-    showCards(playerHand);
-    console.log("You win, your hand is: ", sumOfHand(playerHand));
+    console.log("You win!!");
+    showResults(playerHand, dealerHand);
     replayGame();
   }
 
   //Checks if the dealer hand is a bust
-  if (isBust(dealerHand)) {
-    console.log("Dealer busts, you win!");
+  if (isBust(dealerHand) && playersChoice === "s") {
+    console.log("Dealer busts, you win! x1b[31m");
+    showResults(playerHand, dealerHand);
     replayGame();
   }
 
@@ -214,12 +222,8 @@ let runnAllChecks = (playerHand, dealerHand) => {
     !isBust(playerHand) &&
     playersChoice === "s"
   ) {
-    console.log("You win, your hand is: ", sumOfHand(playerHand));
+    console.log("You win");
+    showResults(playerHand, dealerHand);
     replayGame();
   }
-
-  console.log("Runnings all checks", [
-    { playerHand: sumOfHand(playerHand) },
-    { dealerHand: sumOfHand(dealerHand) },
-  ]);
 };
