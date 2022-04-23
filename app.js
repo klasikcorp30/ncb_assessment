@@ -205,7 +205,7 @@ let runnAllChecks = (playerHand, dealerHand) => {
 
   //Checks if the dealer hand is a bust
   if (isBust(dealerHand) && playersChoice === "s") {
-    console.log("Dealer busts, you win! x1b[31m");
+    console.log("Dealer busts, you win!!");
     showResults(playerHand, dealerHand);
     replayGame();
   }
