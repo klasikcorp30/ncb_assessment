@@ -1,11 +1,14 @@
+const { exit } = require("process");
 const readline = require("readline");
 const {
   getRandomCard,
   hit,
   stand,
-  getMyCards,
+  showCards,
   sumOfHand,
   isBust,
+  assignCards,
+  isAcePresent,
 } = require("./functions");
 
 const rl = readline.createInterface({
@@ -14,33 +17,40 @@ const rl = readline.createInterface({
   terminal: false,
 });
 
-//TODO: Start Gameplay
+/*
+This is where the game starts
+*/
+
+/*This variable is to keep track of the plaer's choice. 
+ This will be needed make decisions concering if dealer or player wins*/
+var playersChoice = "";
 const startGame = () => {
   console.log("Dealing hands");
   let playerHand = [];
   let dealerHand = [];
-  let playerScore = 0;
-  let dealerScore = 0;
 
   //Assign cards
   assignCards(playerHand, dealerHand);
 
   //Get player's cards
-  getMyCards(playerHand);
+  showCards(playerHand);
 
-  //Check if Ace is present and if so, ask if they want to be 1 or 11
-  //use filter
-  let isAcePresent = playerHand.filter((card) => {
-    return Object.values(card)[0] === 1;
-  });
+  //Check if Ace is present
+  let acePresentForPlayer = isAcePresent(playerHand);
 
-  if (isAcePresent.length > 0) {
+  //If player has an Ace, ask if they want to use it as 11 or 1
+  if (acePresentForPlayer.length > 0) {
     rl.question("Do you want Ace to be 1 or 11? ", (answer) => {
       if (answer === "1") {
-        playerHand["A"] = 1;
+        //Checking criteria with Ace as 1
+        checkingCriteria(playerHand, dealerHand, 1);
         playGame(playerHand, dealerHand);
       } else {
-        playerHand["A"] = 11;
+        //Checking criteria with Ace as 11
+        playerHand = playerHand.filter((card) => Object.keys(card)[0] !== "A");
+        playerHand.push({ A: 11 });
+        //Running check 2 to see if the new hand is a win
+        checkingCriteria(playerHand, dealerHand, 2);
         playGame(playerHand, dealerHand);
       }
     });
@@ -51,12 +61,16 @@ const startGame = () => {
 
 startGame();
 
+//Functions for the game
+
 function playGame(playerHand, dealerHand) {
   rl.question(`Press {h} to hit or Press {s} to stand: `, (response) => {
+    //Set Player's choice
+    playersChoice = response;
     switch (response) {
       case "h":
         hit(playerHand, getRandomCard());
-        getMyCards(playerHand);
+        showCards(playerHand);
         checkingCriteria(playerHand, dealerHand);
         playGame(playerHand, dealerHand);
         break;
@@ -75,23 +89,38 @@ function playGame(playerHand, dealerHand) {
   });
 }
 
-function checkingCriteria(playerHand, dealerHand) {
-  if (isBust(playerHand)) {
-    getMyCards(playerHand);
-    console.log("Bust, Dealer wins!");
-    // Ask if they want to play again
-    replayGame();
-  }
-  if (sumOfHand(playerHand) === 21) {
-    getMyCards(playerHand);
-    console.log("Blackjack!! You win!!");
-    replayGame();
-  }
+function checkingCriteria(playerHand, dealerHand, checkOption) {
+  switch (checkOption) {
+    case 1:
+      if (isBust(playerHand)) {
+        showCards(playerHand);
+        console.log("Bust, Dealer wins!");
+        // Ask if they want to play again
+        replayGame();
+      }
+      break;
+    case 2:
+      if (sumOfHand(playerHand) === 21) {
+        showCards(playerHand);
+        console.log("Blackjack!! You win!!");
+        replayGame();
+      }
+      break;
 
-  if (sumOfHand(dealerHand) > sumOfHand(playerHand) && !isBust(dealerHand)) {
-    getMyCards(dealerHand, "Dealer's");
-    console.log("Dealer wins, Dealer's hand is: ", sumOfHand(dealerHand));
-    replayGame();
+    case 3:
+      if (
+        sumOfHand(dealerHand) > sumOfHand(playerHand) &&
+        !isBust(dealerHand)
+      ) {
+        showCards(dealerHand, "Dealer's");
+        console.log("Dealer wins, Dealer's hand is: ", sumOfHand(dealerHand));
+        replayGame();
+      }
+      break;
+
+    default:
+      runnAllChecks(playerHand, dealerHand);
+      break;
   }
 }
 
@@ -102,14 +131,85 @@ function replayGame() {
     } else {
       console.log("Thanks for playing!");
       rl.close();
+      exit();
     }
   });
 }
 
-function assignCards(playerHand, dealerHand) {
-  playerHand.push(getRandomCard());
-  dealerHand.push(getRandomCard());
-  playerHand.push(getRandomCard());
-  dealerHand.push(getRandomCard());
-}
-//TODO: End Gameplay
+let runnAllChecks = (playerHand, dealerHand) => {
+  /**
+   * This checks if the player has a bust hand
+   */
+  if (isBust(playerHand)) {
+    showCards(playerHand);
+    console.log("Bust, Dealer wins!");
+    replayGame();
+  }
+  /**
+   *This checks if the player has a blackjack hand
+   *If so, the player wins
+   */
+  if (sumOfHand(playerHand) === 21) {
+    showCards(playerHand);
+    console.log("Blackjack!! You win!!");
+    replayGame();
+  }
+  /**
+   * This checks if the dealer has a higher score than the player
+   * as well as if the dealer has not busted. If both conditions are met,
+   * the dealer wins.
+   */
+  if (
+    sumOfHand(dealerHand) > sumOfHand(playerHand) &&
+    !isBust(dealerHand) &&
+    sumOfHand(dealerHand) > 17 &&
+    playersChoice === "s"
+  ) {
+    showCards(dealerHand, "Dealer's");
+    console.log("Dealer wins, Dealer's hand is: ", sumOfHand(dealerHand));
+    replayGame();
+  }
+
+  /**
+   * This checks is similar to the previous check, but this time
+   * the player has a higher score than the dealer. If both conditions are met,
+   * the player wins.
+   */
+  if (
+    sumOfHand(playerHand) > sumOfHand(dealerHand) &&
+    !isBust(playerHand) &&
+    sumOfHand(dealerHand) > 17 &&
+    playersChoice === "s"
+  ) {
+    showCards(playerHand);
+    console.log("You win, your hand is: ", sumOfHand(playerHand));
+    replayGame();
+  }
+
+  //Checks if the dealer hand is a bust
+  if (isBust(dealerHand)) {
+    console.log("Dealer busts, you win!");
+    replayGame();
+  }
+
+  //Checks if the dealer has a blackjack hand
+  if (sumOfHand(dealerHand) === 21) {
+    console.log("Dealer has blackjack, you lose!");
+    replayGame();
+  }
+
+  //Simple check if player has a higher score than the dealer
+  if (
+    sumOfHand(playerHand) > sumOfHand(dealerHand) &&
+    !isBust(playerHand) &&
+    playersChoice === "s"
+  ) {
+    console.log("You win, your hand is: ", sumOfHand(playerHand));
+    replayGame();
+  }
+
+  console.log("Runnings all checks", [
+    { playerHand: sumOfHand(playerHand) },
+    { dealerHand: sumOfHand(dealerHand) },
+  ]);
+};

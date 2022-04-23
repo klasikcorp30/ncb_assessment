@@ -22,23 +22,14 @@ const sumOfHand = (hand) => {
 };
 
 const stand = (dealerHands) => {
+  console.log("Bool", sumOfHand(dealerHands) < 17);
   while (sumOfHand(dealerHands) < 17) {
     hit(dealerHands, getRandomCard());
-    console.log("Dealer's Hand: ", dealerHands);
-  }
-
-  // Check if the player has busted
-  if (isBust(dealerHands)) {
-    console.log("Dealer busts, you win!");
-  }
-
-  // Check if the dealer has busted
-  if (isBust(dealerHands)) {
-    console.log("Dealer busts, you win!");
+    showCards(dealerHands, "Dealer");
   }
 };
 //This function will be used to display the cards in the hand
-const getMyCards = (hand, name = "Player") => {
+const showCards = (hand, name = "Player") => {
   console.log(name + " Hand: ", hand);
 };
 
@@ -49,12 +40,27 @@ const isBust = (hand) => {
   return sumOfHand(hand) > 21;
 };
 
+const assignCards = (playerHand, dealerHand) => {
+  playerHand.push(getRandomCard());
+  dealerHand.push(getRandomCard());
+  playerHand.push(getRandomCard());
+  dealerHand.push(getRandomCard());
+};
+
+const isAcePresent = (hand) => {
+  return hand.filter((card) => {
+    return Object.values(card)[0] === 1;
+  });
+};
+
 module.exports = {
   getRandomCard,
   hit,
-  getMyCards,
+  showCards,
   stand,
   RANDOMCARD,
   sumOfHand,
   isBust,
+  assignCards,
+  isAcePresent,
 };
